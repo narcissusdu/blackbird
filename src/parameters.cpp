@@ -95,6 +95,10 @@ Parameters::Parameters(std::string fileName) {
   bitfinexSecret = getParameter("BitfinexSecretKey", configFile);
   bitfinexFees = getDouble(getParameter("BitfinexFees", configFile));
   bitfinexEnable = getBool(getParameter("BitfinexEnable", configFile));
+  bitmexApi = getParameter("BitmexApiKey", configFile);
+  bitmexSecret = getParameter("BitmexSecretKey", configFile);
+  bitmexFees = getDouble(getParameter("BitmexFees", configFile));
+  bitmexEnable = getBool(getParameter("BitmexEnable", configFile));
   okcoinApi = getParameter("OkCoinApiKey", configFile);
   okcoinSecret = getParameter("OkCoinSecretKey", configFile);
   okcoinFees = getDouble(getParameter("OkCoinFees", configFile));
