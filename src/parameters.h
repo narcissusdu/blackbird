@@ -44,6 +44,10 @@ struct Parameters {
   std::string bitfinexSecret;
   double bitfinexFees;
   bool bitfinexEnable;
+  std::string bitmexApi;
+  std::string bitmexSecret;
+  double bitmexFees;
+  bool bitmexEnable;
   std::string okcoinApi;
   std::string okcoinSecret;
   double okcoinFees;

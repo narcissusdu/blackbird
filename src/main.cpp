@@ -6,6 +6,7 @@
 #include "parameters.h"
 #include "check_entry_exit.h"
 #include "exchanges/bitfinex.h"
+#include "exchanges/bitmex.h"
 #include "exchanges/okcoin.h"
 #include "exchanges/bitstamp.h"
 #include "exchanges/gemini.h"
@@ -116,6 +117,19 @@ int main(int argc, char** argv) {
     getLimitPrice[index] = Bitfinex::getLimitPrice;
 
     dbTableName[index] = "bitfinex";
+    createTable(dbTableName[index], params);
+
+    index++;
+  }
+  if (params.bitmexEnable &&
+     (params.bitmexApi.empty() == false || params.demoMode == true)) {
+    params.addExchange("Bitmex", params.bitmexFees, false, true);
+    getQuote[index] = Bitmex::getQuote;
+    getAvail[index] = Bitmex::getAvail;
+    getActivePos[index] = Bitmex::getActivePos;
+    getLimitPrice[index] = Bitmex::getLimitPrice;
+
+    dbTableName[index] = "bitmex";
     createTable(dbTableName[index], params);
 
     index++;
