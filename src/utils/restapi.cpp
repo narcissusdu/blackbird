@@ -5,29 +5,32 @@
 #include <chrono>
 #include <thread> // sleep
 
+namespace
+{
 
-namespace {
-  
 // automatic init of curl's systems
-struct CurlStartup {
-  CurlStartup()   { curl_global_init(CURL_GLOBAL_ALL); }
-  ~CurlStartup()  { curl_global_cleanup(); }
-}runCurlStartup;
+struct CurlStartup
+{
+  CurlStartup() { curl_global_init(CURL_GLOBAL_ALL); }
+  ~CurlStartup() { curl_global_cleanup(); }
+} runCurlStartup;
 
 // internal helpers
-size_t recvCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-  auto &buffer = *static_cast<std::string *> (userp);
+size_t recvCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  auto &buffer = *static_cast<std::string *>(userp);
   auto n = size * nmemb;
-  return buffer.append((char*)contents, n), n;
+  return buffer.append((char *)contents, n), n;
 }
 
-json_t* doRequest(CURL *C,
+json_t *doRequest(CURL *C,
                   const std::string &url,
                   const curl_slist *headers,
-                  std::ostream &log) {
+                  std::ostream &log)
+{
   std::string recvBuffer;
   curl_easy_setopt(C, CURLOPT_WRITEDATA, &recvBuffer);
-                    
+
   curl_easy_setopt(C, CURLOPT_URL, url.c_str());
   curl_easy_setopt(C, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(C, CURLOPT_DNS_CACHE_TIMEOUT, 3600);
@@ -42,23 +45,26 @@ retry_state:
 
 curl_state:
   CURLcode resCurl = curl_easy_perform(C);
-  if (resCurl != CURLE_OK) {
+  if (resCurl != CURLE_OK)
+  {
     log << "Error with cURL: " << curl_easy_strerror(resCurl) << '\n'
         << "  URL: " << url << '\n';
 
     goto retry_state;
   }
 
-/* documentation label */
-// json_state:
+  /* documentation label */
+  // json_state:
   json_error_t error;
   json_t *root = json_loads(recvBuffer.c_str(), 0, &error);
-  if (!root) {
+  if (!root)
+  {
     long resp_code;
     curl_easy_getinfo(C, CURLINFO_RESPONSE_CODE, &resp_code);
     log << "Server Response: " << resp_code << " - " << url << '\n'
         << "Error with JSON: " << error.text << '\n'
-        << "Buffer:\n"         << recvBuffer << '\n';
+        << "Buffer:\n"
+        << recvBuffer << '\n';
 
     goto retry_state;
   }
@@ -67,21 +73,25 @@ curl_state:
 }
 }
 
-void RestApi::CURL_deleter::operator () (CURL *C) {
+void RestApi::CURL_deleter::operator()(CURL *C)
+{
   curl_easy_cleanup(C);
 }
 
-void RestApi::CURL_deleter::operator () (curl_slist *slist) {
+void RestApi::CURL_deleter::operator()(curl_slist *slist)
+{
   curl_slist_free_all(slist);
 }
 
 RestApi::RestApi(string host, const char *cacert, std::ostream &log)
-    : C(curl_easy_init()), host(std::move(host)), log(log) {
+    : C(curl_easy_init()), host(std::move(host)), log(log)
+{
   assert(C != nullptr);
 
   if (cacert)
-        curl_easy_setopt(C.get(), CURLOPT_CAINFO, cacert);
-  else  curl_easy_setopt(C.get(), CURLOPT_SSL_VERIFYPEER, false);
+    curl_easy_setopt(C.get(), CURLOPT_CAINFO, cacert);
+  else
+    curl_easy_setopt(C.get(), CURLOPT_SSL_VERIFYPEER, false);
 
   curl_easy_setopt(C.get(), CURLOPT_CONNECTTIMEOUT, 10L);
   curl_easy_setopt(C.get(), CURLOPT_TIMEOUT, 20L);
@@ -91,19 +101,32 @@ RestApi::RestApi(string host, const char *cacert, std::ostream &log)
   curl_easy_setopt(C.get(), CURLOPT_WRITEFUNCTION, recvCallback);
 }
 
-json_t* RestApi::getRequest(const string &uri, unique_slist headers) {
+json_t *RestApi::getRequest(const string &uri, unique_slist headers)
+{
   curl_easy_setopt(C.get(), CURLOPT_HTTPGET, true);
   return doRequest(C.get(), host + uri, headers.get(), log);
 }
 
-json_t* RestApi::postRequest (const string &uri,
-                              unique_slist headers,
-                              const string &post_data) {
-  curl_easy_setopt(C.get(), CURLOPT_POSTFIELDS,     post_data.data());
-  curl_easy_setopt(C.get(), CURLOPT_POSTFIELDSIZE,  post_data.size());
+json_t *RestApi::postRequest(const string &uri,
+                             unique_slist headers,
+                             const string &post_data)
+{
+  curl_easy_setopt(C.get(), CURLOPT_POSTFIELDS, post_data.data());
+  curl_easy_setopt(C.get(), CURLOPT_POSTFIELDSIZE, post_data.size());
   return doRequest(C.get(), host + uri, headers.get(), log);
 }
 
-json_t* RestApi::postRequest (const string &uri, const string &post_data) {
+json_t *RestApi::postRequest(const string &uri, const string &post_data)
+{
   return postRequest(uri, nullptr, post_data);
+}
+
+json_t *RestApi::deleteRequest(const string &uri,
+                               unique_slist headers,
+                               const string &post_data)
+{
+  curl_easy_setopt(C.get(), CURLOPT_CUSTOMREQUEST, "DELETE");
+  curl_easy_setopt(C.get(), CURLOPT_POSTFIELDS, post_data.data());
+  curl_easy_setopt(C.get(), CURLOPT_POSTFIELDSIZE, post_data.size());
+  return doRequest(C.get(), host + uri, headers.get(), log);
 }

@@ -121,19 +121,38 @@ int main(int argc, char** argv) {
 
     index++;
   }
-  if (params.bitmexEnable &&
-     (params.bitmexApi.empty() == false || params.demoMode == true)) {
-    params.addExchange("Bitmex", params.bitmexFees, false, true);
-    getQuote[index] = Bitmex::getQuote;
-    getAvail[index] = Bitmex::getAvail;
-    getActivePos[index] = Bitmex::getActivePos;
-    getLimitPrice[index] = Bitmex::getLimitPrice;
 
-    dbTableName[index] = "bitmex";
+  //Bitmex has 2 instruments.
+  if (params.bitmexEnable &&
+     (params.bitmexApiKey.empty() == false || params.demoMode == true)) {
+
+    params.addExchange(Bitmex0::getName(params), params.bitmexFees, false, true);
+    getQuote[index] = Bitmex0::getQuote;
+    getAvail[index] = Bitmex0::getAvail;
+    getActivePos[index] = Bitmex0::getActivePos;
+    getLimitPrice[index] = Bitmex0::getLimitPrice;
+
+    dbTableName[index] = Bitmex0::getName(params);
     createTable(dbTableName[index], params);
 
     index++;
   }
+
+if (params.bitmexEnable &&
+     (params.bitmexApiKey.empty() == false || params.demoMode == true)) {
+
+    params.addExchange(Bitmex1::getName(params), params.bitmexFees, false, true);
+    getQuote[index] = Bitmex1::getQuote;
+    getAvail[index] = Bitmex1::getAvail;
+    getActivePos[index] = Bitmex1::getActivePos;
+    getLimitPrice[index] = Bitmex1::getLimitPrice;
+
+    dbTableName[index] = Bitmex1::getName(params);
+    createTable(dbTableName[index], params);
+
+    index++;
+  }
+
   if (params.okcoinEnable &&
      (params.okcoinApi.empty() == false || params.demoMode == true)) {
     params.addExchange("OKCoin", params.okcoinFees, false, true);

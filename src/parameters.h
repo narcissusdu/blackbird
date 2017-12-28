@@ -44,7 +44,10 @@ struct Parameters {
   std::string bitfinexSecret;
   double bitfinexFees;
   bool bitfinexEnable;
-  std::string bitmexApi;
+
+  unsigned bitmexInstrumentsCount;
+  std::string* bitmexInstruments;
+  std::string bitmexApiKey;
   std::string bitmexSecret;
   double bitmexFees;
   bool bitmexEnable;
@@ -108,6 +111,7 @@ struct Parameters {
 // Copies the parameters from the configuration file
 // to the Parameter structure.
 std::string getParameter(std::string parameter, std::ifstream& configFile);
+std::string* getParameterArray(std::string parameterKey,unsigned count, std::ifstream& configFile);
 
 bool getBool(std::string value);
 

@@ -95,10 +95,14 @@ Parameters::Parameters(std::string fileName) {
   bitfinexSecret = getParameter("BitfinexSecretKey", configFile);
   bitfinexFees = getDouble(getParameter("BitfinexFees", configFile));
   bitfinexEnable = getBool(getParameter("BitfinexEnable", configFile));
-  bitmexApi = getParameter("BitmexApiKey", configFile);
+
+  bitmexInstrumentsCount = getUnsigned(getParameter("BitmexInstrumentsCount", configFile));
+  bitmexInstruments = getParameterArray("BitmexInstruments", bitmexInstrumentsCount, configFile);
+  bitmexApiKey = getParameter("BitmexApiKey", configFile);
   bitmexSecret = getParameter("BitmexSecretKey", configFile);
   bitmexFees = getDouble(getParameter("BitmexFees", configFile));
   bitmexEnable = getBool(getParameter("BitmexEnable", configFile));
+
   okcoinApi = getParameter("OkCoinApiKey", configFile);
   okcoinSecret = getParameter("OkCoinSecretKey", configFile);
   okcoinFees = getDouble(getParameter("OkCoinFees", configFile));
@@ -164,7 +168,6 @@ std::string getParameter(std::string parameter, std::ifstream& configFile) {
   std::string line;
   configFile.clear();
   configFile.seekg(0);
-
   while (getline(configFile, line)) {
     if (line.length() > 0 && line.at(0) != '#') {
       std::string key = line.substr(0, line.find('='));
@@ -176,6 +179,18 @@ std::string getParameter(std::string parameter, std::ifstream& configFile) {
   }
   std::cout << "ERROR: parameter '" << parameter << "' not found. Your configuration file might be too old.\n" << std::endl;
   exit(EXIT_FAILURE);
+}
+
+std::string* getParameterArray(std::string parameterKey, unsigned count, std::ifstream& configFile){
+  std::string* parameterArray = new std::string[256];
+  std::string parameterValue = getParameter(parameterKey, configFile);
+  for (unsigned i = 0;i<count;i++){
+    parameterArray[i] = parameterValue.substr(0,parameterValue.find(','));
+    if(i < count-1){
+      parameterValue = parameterValue.substr(parameterValue.find(',')+1,parameterValue.length());
+    }    
+  }
+  return parameterArray;
 }
 
 bool getBool(std::string value) {
