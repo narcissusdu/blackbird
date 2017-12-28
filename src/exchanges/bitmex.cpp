@@ -48,11 +48,8 @@ static std::string METHOD_POST("POST");
 
 json_t *authRequest(Parameters &params, std::string method, std::string function, std::string paramData)
 {
-    // std::string key = param.bitmexApiKey;
-    // std::string secret = param.bitmexSecret;
-
-    std::string key = "rBjBP0MIVNmKd0MMI0FSurYr";
-    std::string secret = "h621LUeASzZd_q-QLaORCPMammww-MyIOA2Hn860dBNm-Rpb";
+    std::string key = param.bitmexApiKey;
+    std::string secret = param.bitmexSecret;
 
     int isGet = METHOD_GET.compare(method) == 0;
     int isDelete = METHOD_DELETE.compare(method) == 0;
