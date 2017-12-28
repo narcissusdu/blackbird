@@ -1,7 +1,6 @@
 #ifndef BITMEX_H
 #define BITMEX_H
 
-
 #include "quote_t.h"
 #include <string>
 
@@ -41,7 +40,5 @@ namespace Bitmex1 {
 
     double getLimitPrice(Parameters& params, double volume, bool isBid);
 }
-
-
 
 #endif
